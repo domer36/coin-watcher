@@ -1,5 +1,5 @@
 Name: 001 Panel de criptomonedas
-Status: Draft
+Status: Approved
 Date: 2026-10-21 18:14
 
 ## Description
@@ -46,9 +46,8 @@ Aplicación web para inversores y traders que permite consultar y explorar preci
 ## Open questions
 - ¿Qué proveedor público se utilizará y qué monedas adicionales a USD y EUR estarán disponibles? La elección queda para la implementación, condicionada a los límites y capacidades del proveedor.
 
-## Proposed tasks
-- T001 - Integración de datos de mercado: Seleccionar el proveedor público e implementar en NestJS la consulta y exposición de precios, capitalización y variación de 24 horas.
-- T002 - Interfaz de mercado: Crear en React la lista paginada, presentación de métricas, búsqueda, ordenamiento y selección de moneda de cotización.
-- T003 - Actualización y tolerancia a fallos: Implementar el refresco fijo de 10 segundos y los estados de carga, datos desactualizados y error.
-- T004 - Verificación de criterios: Probar la integración, paginación, búsqueda, ordenamiento, monedas, actualización periódica y manejo de errores frente a los criterios de aceptación.
-- T005 - Intengrar docker-compose para conectar frontend con backend
+## Tasks
+- [ ] [T001 - Integración de datos de mercado](tasks/T001-integracion-datos-mercado.md)
+- [ ] [T002 - Interfaz de mercado](tasks/T002-interfaz-mercado.md)
+- [ ] [T003 - Actualización y tolerancia a fallos](tasks/T003-actualizacion-tolerancia-fallos.md)
+- [ ] [T004 - Ejecución integrada con Docker Compose](tasks/T004-ejecucion-docker-compose.md)
