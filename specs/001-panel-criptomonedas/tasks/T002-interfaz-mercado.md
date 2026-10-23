@@ -2,7 +2,7 @@ Type: task
 ID: T002
 Name: Interfaz de mercado
 Spec: 001-panel-criptomonedas
-Status: in review
+Status: Completed
 Date: 2026-10-22 19:51
 Branch: task/001-t002-interfaz-mercado
 Depends on: T001
