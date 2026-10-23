@@ -2,7 +2,7 @@ Type: task
 ID: T004
 Name: Ejecución integrada con Docker Compose
 Spec: 001-panel-criptomonedas
-Status: in review
+Status: Completed
 Date: 2026-10-22 19:51
 Branch: task/001-t004-ejecucion-docker-compose
 Depends on: T001, T002, T003
