@@ -57,6 +57,23 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
+## Market data API
+
+The backend uses CoinGecko's Demo API through a replaceable market-data provider.
+`GET /markets` returns up to 20 assets ordered by market capitalization, with
+`currency` (default `USD`), `page` (default `1`), and `perPage` (default `20`,
+maximum `20`) query parameters. `GET /markets/currencies` lists supported quote
+currencies. Each market response contains `data`, `page`, `perPage`, and
+`hasMore`; assets include their name, symbol, current price, 24-hour percentage
+change, and market capitalization.
+
+Set `COINGECKO_API_KEY` in the backend environment to use a CoinGecko Demo API
+key. The key is sent only in a server-to-server header; without it, requests
+use CoinGecko's keyless access and its shared IP-based rate limit. The provider
+quote-currency list is cached in memory for 24 hours. CoinGecko documents a
+100-calls-per-minute limit for the Demo plan, while one client refreshing every
+10 seconds makes six market-data requests per minute.
+
 ## Deployment
 
 When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
