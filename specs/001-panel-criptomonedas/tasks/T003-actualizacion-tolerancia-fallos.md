@@ -2,7 +2,7 @@ Type: task
 ID: T003
 Name: Actualización y tolerancia a fallos
 Spec: 001-panel-criptomonedas
-Status: Implemented
+Status: Completed
 Date: 2026-10-22 19:51
 Branch: task/001-t003-actualizacion-tolerancia-fallos
 Depends on: T001, T002
