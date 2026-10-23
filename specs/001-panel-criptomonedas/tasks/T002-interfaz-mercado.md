@@ -19,8 +19,8 @@ Crear en React la vista de mercado conectada al endpoint NestJS. La interfaz pre
 - [x] Permitir seleccionar USD, EUR y las demás monedas disponibles, con USD como valor inicial.
 
 ## Test (acceptance criteria)
-- [ ] La vista inicial muestra hasta 20 resultados ordenados por capitalización descendente y todas las métricas requeridas.
-- [ ] La navegación permite consultar otra página y regresar a la página anterior.
-- [ ] La búsqueda encuentra criptomonedas por nombre o símbolo ignorando diferencias de mayúsculas y minúsculas.
-- [ ] Cada opción de ordenamiento cambia el orden visible según precio, nombre o capitalización.
-- [ ] Cambiar la moneda de cotización actualiza los precios y la selección inicial es USD.
+- [x] La vista inicial muestra hasta 20 resultados ordenados por capitalización descendente y todas las métricas requeridas.
+- [x] La navegación permite consultar otra página y regresar a la página anterior.
+- [x] La búsqueda encuentra criptomonedas por nombre o símbolo ignorando diferencias de mayúsculas y minúsculas.
+- [x] Cada opción de ordenamiento cambia el orden visible según precio, nombre o capitalización.
+- [x] Cambiar la moneda de cotización actualiza los precios y la selección inicial es USD.
