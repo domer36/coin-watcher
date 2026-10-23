@@ -2,7 +2,7 @@ Type: task
 ID: T001
 Name: Integración de datos de mercado
 Spec: 001-panel-criptomonedas
-Status: Implemented
+Status: Completed
 Date: 2026-10-22 19:51
 Branch: task/001-t001-integracion-datos-mercado
 Depends on: -
