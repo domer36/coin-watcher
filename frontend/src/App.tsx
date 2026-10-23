@@ -19,6 +19,7 @@ interface MarketPage {
 type SortBy = 'marketCap' | 'price' | 'name'
 
 const API_PATH = '/api/markets'
+const REFRESH_INTERVAL = 10_000
 
 function App() {
   const [assets, setAssets] = useState<MarketAsset[]>([])
@@ -34,11 +35,17 @@ function App() {
   const [retryCount, setRetryCount] = useState(0)
 
   useEffect(() => {
-    const controller = new AbortController()
+    let active = true
+    let inFlight = false
+    let controller: AbortController | undefined
 
     async function loadMarkets() {
+      if (inFlight) return
+
+      inFlight = true
       setLoading(true)
-      setError('')
+      const requestController = new AbortController()
+      controller = requestController
 
       try {
         const params = new URLSearchParams({
@@ -47,33 +54,46 @@ function App() {
           perPage: '20',
         })
         const response = await fetch(`${API_PATH}?${params}`, {
-          signal: controller.signal,
+          signal: requestController.signal,
         })
         if (!response.ok) {
           throw new Error(`Market request failed (${response.status})`)
         }
 
         const result = (await response.json()) as MarketPage
+        if (!active) return
         setAssets(result.data)
         setHasMore(result.hasMore)
+        setError('')
       } catch (requestError) {
         if (requestError instanceof DOMException && requestError.name === 'AbortError') {
           return
         }
-        setError(
-          requestError instanceof Error
-            ? requestError.message
-            : 'No se pudieron cargar los datos del mercado.',
-        )
+        if (active) {
+          setError(
+            requestError instanceof Error
+              ? requestError.message
+              : 'No se pudieron cargar los datos del mercado.',
+          )
+        }
       } finally {
-        if (!controller.signal.aborted) {
+        inFlight = false
+        if (active) {
           setLoading(false)
         }
       }
     }
 
     void loadMarkets()
-    return () => controller.abort()
+    const intervalId = window.setInterval(() => {
+      void loadMarkets()
+    }, REFRESH_INTERVAL)
+
+    return () => {
+      active = false
+      window.clearInterval(intervalId)
+      controller?.abort()
+    }
   }, [currency, page, retryCount])
 
   useEffect(() => {
@@ -172,7 +192,7 @@ function App() {
         </div>
         <div className="heading-note">
           <span className="heading-note-icon" aria-hidden="true">↗</span>
-          <span>Datos del mercado<br /><strong>Actualizados al consultar</strong></span>
+          <span>Datos del mercado<br /><strong>Actualización automática cada 10 s</strong></span>
         </div>
       </section>
 
@@ -276,7 +296,7 @@ function App() {
               ) : visibleAssets.length === 0 ? (
                 <tr>
                   <td className="table-state" colSpan={5}>
-                    {search
+                    {search.trim() && assets.length > 0
                       ? 'No hay criptomonedas que coincidan con la búsqueda.'
                       : 'No hay datos de mercado disponibles.'}
                   </td>
@@ -311,6 +331,12 @@ function App() {
             </tbody>
           </table>
         </div>
+
+        {error && assets.length > 0 && (
+          <p className="inline-warning" role="status">
+            Los datos mostrados pueden estar desactualizados. No se pudo actualizar el mercado: {error}
+          </p>
+        )}
 
         <footer className="panel-footer">
           <span className="page-indicator">
