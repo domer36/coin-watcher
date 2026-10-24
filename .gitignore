@@ -50,3 +50,5 @@ temp/
 *.ntvs*
 *.njsproj
 *.sln
+
+assets
