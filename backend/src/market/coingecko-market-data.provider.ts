@@ -112,12 +112,14 @@ function toMarketAsset(value: unknown): MarketAsset {
     );
   }
 
-  const { name, symbol } = value;
+  const { name, symbol, image } = value;
   if (
     typeof name !== 'string' ||
     typeof symbol !== 'string' ||
+    typeof image !== 'string' ||
     name.length === 0 ||
-    symbol.length === 0
+    symbol.length === 0 ||
+    !isHttpUrl(image)
   ) {
     throw new ServiceUnavailableException(
       'CoinGecko returned an invalid market data item',
@@ -127,6 +129,7 @@ function toMarketAsset(value: unknown): MarketAsset {
   return {
     name,
     symbol: symbol.toUpperCase(),
+    imageUrl: image,
     price: toNullableNumber(value.current_price, 'current_price'),
     priceChangePercentage24h: toNullableNumber(
       value.price_change_percentage_24h,
@@ -134,6 +137,15 @@ function toMarketAsset(value: unknown): MarketAsset {
     ),
     marketCap: toNullableNumber(value.market_cap, 'market_cap'),
   };
+}
+
+function isHttpUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return url.protocol === 'https:' || url.protocol === 'http:';
+  } catch {
+    return false;
+  }
 }
 
 function toNullableNumber(value: unknown, field: string): number | null {

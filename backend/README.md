@@ -65,7 +65,7 @@ The backend uses CoinGecko's Demo API through a replaceable market-data provider
 maximum `20`) query parameters. `GET /markets/currencies` lists supported quote
 currencies. Each market response contains `data`, `page`, `perPage`, and
 `hasMore`; assets include their name, symbol, current price, 24-hour percentage
-change, and market capitalization.
+change, market capitalization, and `imageUrl` for the coin logo.
 
 Set `COINGECKO_API_KEY` in the backend environment to use a CoinGecko Demo API
 key. The key is sent only in a server-to-server header; without it, requests
