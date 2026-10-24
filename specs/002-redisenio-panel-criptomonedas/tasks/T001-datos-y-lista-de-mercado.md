@@ -2,7 +2,7 @@ Type: task
 ID: T001
 Name: Datos y lista de mercado
 Spec: 002-redisenio-panel-criptomonedas
-Status: Approved
+Status: pending
 Date: 2026-10-23 18:35
 Branch: task/002-t001-datos-y-lista-de-mercado
 Depends on: -
