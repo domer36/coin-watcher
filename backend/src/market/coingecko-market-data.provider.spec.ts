@@ -23,6 +23,7 @@ describe('CoinGeckoMarketDataProvider', () => {
         {
           name: 'Bitcoin',
           symbol: 'btc',
+          image: 'https://assets.coingecko.com/coins/images/1/large/bitcoin.png',
           current_price: 65000,
           price_change_percentage_24h: 2.5,
           market_cap: 1_000_000,
@@ -36,6 +37,8 @@ describe('CoinGeckoMarketDataProvider', () => {
       {
         name: 'Bitcoin',
         symbol: 'BTC',
+        imageUrl:
+          'https://assets.coingecko.com/coins/images/1/large/bitcoin.png',
         price: 65000,
         priceChangePercentage24h: 2.5,
         marketCap: 1_000_000,
@@ -62,6 +65,7 @@ describe('CoinGeckoMarketDataProvider', () => {
           {
             name: 'Bitcoin',
             symbol: 'btc',
+            image: 'https://assets.coingecko.com/coins/images/1/large/bitcoin.png',
             current_price: 65000,
             price_change_percentage_24h: 2.5,
             market_cap: 1_000_000,
@@ -73,6 +77,7 @@ describe('CoinGeckoMarketDataProvider', () => {
           {
             name: 'Ethereum',
             symbol: 'eth',
+            image: 'https://assets.coingecko.com/coins/images/279/large/ethereum.png',
             current_price: 3500,
             price_change_percentage_24h: 1.5,
             market_cap: 500_000,
@@ -101,6 +106,28 @@ describe('CoinGeckoMarketDataProvider', () => {
     });
     expect(pages).toEqual(['1', '2']);
   });
+
+  it.each([undefined, '', 'javascript:alert(1)'])(
+    'rejects market data without a usable logo URL (%s)',
+    async (image) => {
+      fetchMock.mockResolvedValue(
+        Response.json([
+          {
+            name: 'Bitcoin',
+            symbol: 'btc',
+            image,
+            current_price: 65000,
+            price_change_percentage_24h: 2.5,
+            market_cap: 1_000_000,
+          },
+        ]),
+      );
+
+      await expect(
+        provider.getMarkets({ currency: 'USD', page: 1, perPage: 20 }),
+      ).rejects.toBeInstanceOf(ServiceUnavailableException);
+    },
+  );
 
   it('requests and caches the provider quote currencies', async () => {
     fetchMock.mockResolvedValue(Response.json(['usd', 'eur', 'jpy']));

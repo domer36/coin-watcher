@@ -22,6 +22,8 @@ describe('MarketService', () => {
       {
         name: 'Bitcoin',
         symbol: 'BTC',
+        imageUrl:
+          'https://assets.coingecko.com/coins/images/1/large/bitcoin.png',
         price: 100,
         priceChangePercentage24h: 1.5,
         marketCap: 2000,
@@ -35,6 +37,8 @@ describe('MarketService', () => {
         {
           name: 'Bitcoin',
           symbol: 'BTC',
+          imageUrl:
+            'https://assets.coingecko.com/coins/images/1/large/bitcoin.png',
           price: 100,
           priceChangePercentage24h: 1.5,
           marketCap: 2000,

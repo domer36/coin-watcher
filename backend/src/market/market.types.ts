@@ -1,6 +1,7 @@
 export interface MarketAsset {
   name: string;
   symbol: string;
+  imageUrl: string;
   price: number | null;
   priceChangePercentage24h: number | null;
   marketCap: number | null;

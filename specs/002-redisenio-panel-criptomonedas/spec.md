@@ -1,5 +1,5 @@
 Name: 002 Rediseño del panel de criptomonedas
-Status: Approved
+Status: In progress
 Date: 2026-10-23 18:26
 
 ## Description
