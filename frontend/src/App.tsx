@@ -13,6 +13,18 @@ interface MarketPage {
   data: MarketAsset[]
 }
 
+type MarketError = 'initial' | 'rate-limit' | 'refresh' | null
+
+class MarketRequestError extends Error {
+  readonly status: number
+
+  constructor(status: number) {
+    super(`Market request failed (${status})`)
+    this.name = 'MarketRequestError'
+    this.status = status
+  }
+}
+
 const API_PATH = '/api/markets'
 const REFRESH_INTERVAL = 10_000
 const FAVORITES_STORAGE_KEY = 'coin-watcher:favorites'
@@ -26,8 +38,9 @@ function App() {
   const [favoriteAssets, setFavoriteAssets] = useState(readFavoriteAssets)
   const [menuOpen, setMenuOpen] = useState(false)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  const [marketError, setMarketError] = useState<MarketError>(null)
   const [retryCount, setRetryCount] = useState(0)
+  const hasLoadedMarkets = useRef(false)
   const menuButtonRef = useRef<HTMLButtonElement>(null)
   const menuPanelRef = useRef<HTMLElement>(null)
   const menuWasOpen = useRef(false)
@@ -55,22 +68,25 @@ function App() {
           signal: requestController.signal,
         })
         if (!response.ok) {
-          throw new Error(`Market request failed (${response.status})`)
+          throw new MarketRequestError(response.status)
         }
 
         const result = (await response.json()) as MarketPage
         if (!active) return
         setAssets(result.data)
-        setError('')
+        hasLoadedMarkets.current = true
+        setMarketError(null)
       } catch (requestError) {
         if (requestError instanceof DOMException && requestError.name === 'AbortError') {
           return
         }
         if (active) {
-          setError(
-            requestError instanceof Error
-              ? requestError.message
-              : 'No se pudieron cargar los datos del mercado.',
+          setMarketError(
+            hasLoadedMarkets.current
+              ? requestError instanceof MarketRequestError && requestError.status === 429
+                ? 'rate-limit'
+                : 'refresh'
+              : 'initial',
           )
         }
       } finally {
@@ -247,7 +263,7 @@ function App() {
             <span className="spinner" aria-hidden="true" />
             Cargando datos del mercado…
           </p>
-        ) : error && assets.length === 0 ? (
+        ) : marketError && assets.length === 0 ? (
           <div className="list-state error-state" role="alert">
             <span className="error-mark" aria-hidden="true">!</span>
             <h2>Hubo un problema 😢</h2>
@@ -320,10 +336,14 @@ function App() {
                 Actualizando datos…
               </p>
             )}
-            {error && (
-              <p className="inline-warning" role="status">
-                No se pudieron actualizar los datos del mercado. Se muestran los últimos datos
-                recibidos.
+            {marketError && (
+              <p
+                className="inline-warning"
+                role={marketError === 'rate-limit' ? 'alert' : 'status'}
+              >
+                {marketError === 'rate-limit'
+                  ? 'La API de CoinGecko alcanzó el límite de solicitudes. Se conservan los datos y se volverá a intentar automáticamente en 10 segundos.'
+                  : 'No se pudieron actualizar los datos del mercado. Se muestran los últimos datos recibidos.'}
               </p>
             )}
           </>
