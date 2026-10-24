@@ -45,7 +45,7 @@ Rediseñar la página principal de Coinwatch con el estilo oscuro y mobile-first
 ## Open questions
 - None
 
-## Proposed tasks
-- T001 - Ampliar datos y rediseñar lista de mercado: proporcionar los logotipos de monedas necesarios y actualizar la página principal con la lista y el estilo de referencia.
-- T002 - Agregar favoritos y menú lateral mock: persistir selecciones, priorizar favoritas y presentar el menú decorativo sin navegación.
-- T003 - Implementar estados de error del nuevo diseño: mostrar error inicial y gestionar alertas de límite de solicitudes y reintentos conservando datos.
+## Tasks
+- [ ] [T001 - Datos y lista de mercado](tasks/T001-datos-y-lista-de-mercado.md)
+- [ ] [T002 - Favoritos y menú lateral](tasks/T002-favoritos-y-menu-lateral.md)
+- [ ] [T003 - Estados de error y reintentos](tasks/T003-estados-de-error-y-reintentos.md)
