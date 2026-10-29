@@ -1,9 +1,14 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import {
   MARKET_DATA_PROVIDER,
   type MarketDataProvider,
 } from './market-data-provider.js';
-import type { MarketPage, MarketQuery } from './market.types.js';
+import type { MarketDetail, MarketPage, MarketQuery } from './market.types.js';
 
 @Injectable()
 export class MarketService {
@@ -30,6 +35,25 @@ export class MarketService {
       perPage: query.perPage,
       hasMore: data.length === query.perPage,
     };
+  }
+
+  async getMarketDetail(id: string, currency: string): Promise<MarketDetail> {
+    const normalizedCurrency = currency.toUpperCase();
+    const currencies = await this.marketDataProvider.getQuoteCurrencies();
+    if (!currencies.includes(normalizedCurrency)) {
+      throw new BadRequestException(
+        `Unsupported quote currency: ${normalizedCurrency}`,
+      );
+    }
+
+    const detail = await this.marketDataProvider.getMarketDetail(
+      id,
+      normalizedCurrency,
+    );
+    if (!detail) {
+      throw new NotFoundException(`Market asset not found: ${id}`);
+    }
+    return detail;
   }
 
   getQuoteCurrencies(): Promise<string[]> {

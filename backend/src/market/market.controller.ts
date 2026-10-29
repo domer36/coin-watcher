@@ -1,6 +1,12 @@
-import { BadRequestException, Controller, Get, Query } from '@nestjs/common';
+import {
+  BadRequestException,
+  Controller,
+  Get,
+  Param,
+  Query,
+} from '@nestjs/common';
 import { MarketService } from './market.service.js';
-import type { MarketPage } from './market.types.js';
+import type { MarketDetail, MarketPage } from './market.types.js';
 
 @Controller('markets')
 export class MarketController {
@@ -22,6 +28,19 @@ export class MarketController {
   @Get('currencies')
   getQuoteCurrencies(): Promise<string[]> {
     return this.marketService.getQuoteCurrencies();
+  }
+
+  @Get(':id')
+  getMarketDetail(
+    @Param('id') id: string,
+    @Query('currency') currency = 'USD',
+  ): Promise<MarketDetail> {
+    if (!/^[a-z0-9-]+$/i.test(id)) {
+      throw new BadRequestException(
+        'id must contain only letters, numbers, and hyphens',
+      );
+    }
+    return this.marketService.getMarketDetail(id.toLowerCase(), currency);
   }
 }
 

@@ -1,5 +1,5 @@
 Name: 003 Detalle de moneda
-Status: Approved
+Status: In progress
 Date: 2026-10-29 12:11
 
 ## Description
