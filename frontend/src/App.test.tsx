@@ -62,7 +62,7 @@ beforeEach(() => {
     if (failedDetailRequests.has(detailRequestCount)) {
       return { ok: false, status: 500, json: async () => ({}) } as Response
     }
-    return { ok: true, json: async () => detailResponse } as Response
+    return { ok: true, json: async () => structuredClone(detailResponse) } as Response
   })
   vi.stubGlobal('fetch', fetchMock)
   vi.spyOn(window, 'scrollTo').mockImplementation(() => {})
@@ -152,7 +152,7 @@ describe('market detail navigation', () => {
       await vi.advanceTimersByTimeAsync(10_000)
     })
     expect(detailRequestCount).toBe(2)
-    expect(screen.getByText('$68,000.00')).toBeTruthy()
+    expect(await screen.findByText('$68,000.00')).toBeTruthy()
 
     fireEvent.click(screen.getByRole('button', { name: 'Volver a la lista' }))
     expect(screen.getByRole('region', { name: 'Mercado de criptomonedas' })).toBeTruthy()
