@@ -2,7 +2,7 @@ Type: task
 ID: T001
 Name: Datos de detalle e historial
 Spec: 003-detalle-de-moneda
-Status: in review
+Status: Completed
 Date: 2026-10-29 12:20
 Branch: task/003-t001-datos-detalle-e-historial
 Depends on: -
