@@ -44,7 +44,7 @@ Al seleccionar una moneda de la lista, la aplicación mostrará una pantalla ind
 ## Open questions
 - ¿El proveedor de mercado existente ofrece datos históricos suficientes para construir el gráfico de siete días? Si no están disponibles, se mostrará “No disponible” sin cambiar de proveedor.
 
-## Proposed tasks
-- T001 - Datos de detalle e historial: exponer y mapear las métricas de detalle y los datos históricos disponibles desde el servicio de mercado.
-- T002 - Pantalla de detalle y navegación: implementar la vista responsive, selección de moneda y regreso a la lista desde el inicio.
-- T003 - Actualización, favoritos y estados: conectar el refresco cada 10 segundos, la persistencia de favoritos y los estados de carga, error y datos faltantes.
+## Tasks
+- [ ] [T001 - Datos de detalle e historial](tasks/T001-datos-detalle-e-historial.md)
+- [ ] [T002 - Pantalla de detalle y navegación](tasks/T002-pantalla-detalle-y-navegacion.md)
+- [ ] [T003 - Actualización, favoritos y estados](tasks/T003-actualizacion-favoritos-y-estados.md)
