@@ -435,6 +435,40 @@
   gap: 24px;
 }
 
+.detail-favorite-toggle {
+  width: 48px;
+  height: 48px;
+  margin-left: auto;
+  flex: 0 0 48px;
+  padding: 9px;
+  border: 1px solid #3b3b3b;
+  border-radius: 50%;
+  color: #929095;
+  background: #202020;
+  cursor: pointer;
+}
+
+.detail-favorite-toggle:hover {
+  background: #303030;
+}
+
+.detail-favorite-toggle svg {
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+.detail-favorite-toggle[aria-pressed="true"] {
+  color: #ffd400;
+}
+
+.detail-favorite-toggle[aria-pressed="true"] svg {
+  fill: currentColor;
+}
+
 .detail-coin-icon {
   position: relative;
   width: 84px;
@@ -677,6 +711,10 @@
 
 .inline-warning {
   color: #f1c27d;
+}
+
+.detail-warning {
+  margin-top: 16px;
 }
 
 .spinner {
