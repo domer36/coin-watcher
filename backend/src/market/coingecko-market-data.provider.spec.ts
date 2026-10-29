@@ -21,12 +21,17 @@ describe('CoinGeckoMarketDataProvider', () => {
     fetchMock.mockResolvedValue(
       Response.json([
         {
+          id: 'bitcoin',
           name: 'Bitcoin',
           symbol: 'btc',
-          image: 'https://assets.coingecko.com/coins/images/1/large/bitcoin.png',
+          image:
+            'https://assets.coingecko.com/coins/images/1/large/bitcoin.png',
           current_price: 65000,
           price_change_percentage_24h: 2.5,
           market_cap: 1_000_000,
+          high_24h: 66_000,
+          low_24h: 64_000,
+          total_volume: 50_000,
         },
       ]),
     );
@@ -35,6 +40,7 @@ describe('CoinGeckoMarketDataProvider', () => {
       provider.getMarkets({ currency: 'EUR', page: 2, perPage: 20 }),
     ).resolves.toEqual([
       {
+        id: 'bitcoin',
         name: 'Bitcoin',
         symbol: 'BTC',
         imageUrl:
@@ -42,6 +48,9 @@ describe('CoinGeckoMarketDataProvider', () => {
         price: 65000,
         priceChangePercentage24h: 2.5,
         marketCap: 1_000_000,
+        high24h: 66_000,
+        low24h: 64_000,
+        totalVolume24h: 50_000,
       },
     ]);
 
@@ -63,9 +72,11 @@ describe('CoinGeckoMarketDataProvider', () => {
       .mockResolvedValueOnce(
         Response.json([
           {
+            id: 'bitcoin',
             name: 'Bitcoin',
             symbol: 'btc',
-            image: 'https://assets.coingecko.com/coins/images/1/large/bitcoin.png',
+            image:
+              'https://assets.coingecko.com/coins/images/1/large/bitcoin.png',
             current_price: 65000,
             price_change_percentage_24h: 2.5,
             market_cap: 1_000_000,
@@ -75,9 +86,11 @@ describe('CoinGeckoMarketDataProvider', () => {
       .mockResolvedValueOnce(
         Response.json([
           {
+            id: 'ethereum',
             name: 'Ethereum',
             symbol: 'eth',
-            image: 'https://assets.coingecko.com/coins/images/279/large/ethereum.png',
+            image:
+              'https://assets.coingecko.com/coins/images/279/large/ethereum.png',
             current_price: 3500,
             price_change_percentage_24h: 1.5,
             market_cap: 500_000,
@@ -113,6 +126,7 @@ describe('CoinGeckoMarketDataProvider', () => {
       fetchMock.mockResolvedValue(
         Response.json([
           {
+            id: 'bitcoin',
             name: 'Bitcoin',
             symbol: 'btc',
             image,
@@ -139,6 +153,101 @@ describe('CoinGeckoMarketDataProvider', () => {
     ]);
     await provider.getQuoteCurrencies();
 
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('maps detail metrics and seven days of price history', async () => {
+    fetchMock
+      .mockResolvedValueOnce(
+        Response.json([
+          {
+            id: 'bitcoin',
+            name: 'Bitcoin',
+            symbol: 'btc',
+            image:
+              'https://assets.coingecko.com/coins/images/1/large/bitcoin.png',
+            current_price: 65000,
+            price_change_percentage_24h: 2.5,
+            market_cap: 1_000_000,
+            high_24h: 66_000,
+            low_24h: 64_000,
+            total_volume: 50_000,
+          },
+        ]),
+      )
+      .mockResolvedValueOnce(
+        Response.json({
+          prices: [
+            [1_761_600_000_000, 64_500],
+            [1_762_200_000_000, 65_000],
+          ],
+        }),
+      );
+
+    await expect(provider.getMarketDetail('bitcoin', 'USD')).resolves.toEqual({
+      id: 'bitcoin',
+      name: 'Bitcoin',
+      symbol: 'BTC',
+      imageUrl: 'https://assets.coingecko.com/coins/images/1/large/bitcoin.png',
+      price: 65000,
+      priceChangePercentage24h: 2.5,
+      marketCap: 1_000_000,
+      high24h: 66_000,
+      low24h: 64_000,
+      totalVolume24h: 50_000,
+      priceHistory: [
+        { timestamp: 1_761_600_000_000, price: 64_500 },
+        { timestamp: 1_762_200_000_000, price: 65_000 },
+      ],
+    });
+
+    const marketsUrl = fetchMock.mock.calls[0]?.[0];
+    const historyUrl = fetchMock.mock.calls[1]?.[0];
+    if (!(marketsUrl instanceof URL) || !(historyUrl instanceof URL)) {
+      throw new Error('CoinGecko request did not use a URL');
+    }
+    expect(marketsUrl.pathname).toBe('/api/v3/coins/markets');
+    expect(marketsUrl.searchParams.get('ids')).toBe('bitcoin');
+    expect(historyUrl.pathname).toBe('/api/v3/coins/bitcoin/market_chart');
+    expect(historyUrl.searchParams.get('vs_currency')).toBe('usd');
+    expect(historyUrl.searchParams.get('days')).toBe('7');
+  });
+
+  it('keeps omitted optional metrics and history unavailable', async () => {
+    fetchMock
+      .mockResolvedValueOnce(
+        Response.json([
+          {
+            id: 'bitcoin',
+            name: 'Bitcoin',
+            symbol: 'btc',
+            image:
+              'https://assets.coingecko.com/coins/images/1/large/bitcoin.png',
+          },
+        ]),
+      )
+      .mockResolvedValueOnce(Response.json({}));
+
+    await expect(
+      provider.getMarketDetail('bitcoin', 'USD'),
+    ).resolves.toMatchObject({
+      id: 'bitcoin',
+      price: null,
+      priceChangePercentage24h: null,
+      marketCap: null,
+      high24h: null,
+      low24h: null,
+      totalVolume24h: null,
+      priceHistory: null,
+    });
+  });
+
+  it('returns no detail when the provider does not return the requested asset', async () => {
+    fetchMock.mockResolvedValueOnce(Response.json([]));
+
+    await expect(
+      provider.getMarketDetail('unknown-coin', 'USD'),
+    ).resolves.toBeNull();
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
