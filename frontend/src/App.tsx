@@ -55,6 +55,7 @@ function App() {
   const [marketDetail, setMarketDetail] = useState<MarketDetail | null>(null)
   const [detailLoading, setDetailLoading] = useState(false)
   const [detailError, setDetailError] = useState(false)
+  const [detailRetryCount, setDetailRetryCount] = useState(0)
   const [loading, setLoading] = useState(true)
   const [marketError, setMarketError] = useState<MarketError>(null)
   const [retryCount, setRetryCount] = useState(0)
@@ -68,16 +69,21 @@ function App() {
 
     const assetId = selectedAsset.id
     let active = true
-    const controller = new AbortController()
+    let inFlight = false
+    let controller: AbortController | undefined
 
     async function loadDetail() {
+      if (inFlight) return
+
+      inFlight = true
+      const requestController = new AbortController()
+      controller = requestController
       setDetailLoading(true)
-      setDetailError(false)
       try {
         const params = new URLSearchParams({ currency: 'USD' })
         const response = await fetch(
           `${API_PATH}/${encodeURIComponent(assetId)}?${params}`,
-          { signal: controller.signal },
+          { signal: requestController.signal },
         )
         if (!response.ok) {
           throw new MarketRequestError(response.status)
@@ -86,6 +92,7 @@ function App() {
         const result = (await response.json()) as MarketDetail
         if (active) {
           setMarketDetail(result)
+          setDetailError(false)
         }
       } catch (requestError) {
         if (requestError instanceof DOMException && requestError.name === 'AbortError') {
@@ -95,6 +102,10 @@ function App() {
           setDetailError(true)
         }
       } finally {
+        inFlight = false
+        if (controller === requestController) {
+          controller = undefined
+        }
         if (active) {
           setDetailLoading(false)
         }
@@ -102,11 +113,16 @@ function App() {
     }
 
     void loadDetail()
+    const intervalId = window.setInterval(() => {
+      void loadDetail()
+    }, REFRESH_INTERVAL)
+
     return () => {
       active = false
-      controller.abort()
+      window.clearInterval(intervalId)
+      controller?.abort()
     }
-  }, [selectedAsset])
+  }, [selectedAsset, detailRetryCount])
 
   useEffect(() => {
     let active = true
@@ -367,6 +383,17 @@ function App() {
               <h2>{selectedAsset.name}</h2>
               <span>{selectedAsset.symbol}</span>
             </div>
+            <button
+              className="detail-favorite-toggle"
+              type="button"
+              aria-label={`${favoriteSet.has(assetKey(selectedAsset)) ? 'Quitar de' : 'Añadir a'} favoritos: ${selectedAsset.name}`}
+              aria-pressed={favoriteSet.has(assetKey(selectedAsset))}
+              onClick={() => toggleFavorite(selectedAsset)}
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m12 2.8 2.8 5.7 6.3.9-4.6 4.4 1.1 6.3-5.6-3-5.6 3 1.1-6.3-4.6-4.4 6.3-.9L12 2.8Z" />
+              </svg>
+            </button>
           </div>
 
           <section className="detail-price" aria-label="Precio actual">
@@ -429,15 +456,27 @@ function App() {
             {detailLoading && !marketDetail ? (
               <p className="history-state" role="status">Cargando historial…</p>
             ) : detailError && !marketDetail ? (
-              <p className="history-state" role="alert">
-                No se pudo cargar el detalle de esta moneda.
-              </p>
+              <div className="history-state error-state" role="alert">
+                <p>No se pudo cargar el detalle de esta moneda.</p>
+                <button
+                  className="retry-button"
+                  type="button"
+                  onClick={() => setDetailRetryCount((count) => count + 1)}
+                >
+                  Reintentar
+                </button>
+              </div>
             ) : marketDetail?.priceHistory?.length ? (
               <PriceHistoryChart points={marketDetail.priceHistory} />
             ) : marketDetail ? (
               <p className="history-state">No disponible</p>
             ) : null}
           </section>
+          {detailError && marketDetail && (
+            <p className="inline-warning detail-warning" role="status">
+              No se pudieron actualizar los datos de esta moneda. Se muestran los últimos datos recibidos.
+            </p>
+          )}
         </section>
       ) : (
         <section className="market-list" aria-label="Mercado de criptomonedas">
